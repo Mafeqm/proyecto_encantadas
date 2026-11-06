@@ -1,0 +1,337 @@
+<div class="min-h-screen bg-slate-50 text-slate-700 font-sans relative overflow-x-hidden pb-32">
+
+  <!-- Halos de luz ambiental estilo Cupertino -->
+  <div class="pointer-events-none fixed -top-24 -left-24 w-80 h-80 rounded-full bg-purple-300/20 blur-3xl"></div>
+  <div class="pointer-events-none fixed top-1/2 -right-24 w-80 h-80 rounded-full bg-teal-300/15 blur-3xl"></div>
+
+  <!-- Contenedor Mobile-First (centrado y estilizado en pantallas grandes) -->
+  <div class="relative z-10 max-w-lg mx-auto px-4 pt-6 space-y-6">
+
+    <!-- ==================== 1. HEADER & GALERÍA (PORTAFOLIO VISUAL) ==================== -->
+    <header class="bg-white/60 backdrop-blur-md rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500/15 to-teal-400/15 flex items-center justify-center">
+            <lucide-icon
+              [img]="icons.Sparkles"
+              [strokeWidth]="iconStrokeWidth"
+              class="w-5 h-5 text-purple-500">
+            </lucide-icon>
+          </div>
+          <div>
+            <span class="text-[11px] font-semibold uppercase tracking-widest text-purple-400 block">
+              Encantadas Beauty Studio
+            </span>
+            <h1 class="text-lg sm:text-xl font-semibold text-slate-800 tracking-tight">
+              Reserva tu cita en Encantadas
+            </h1>
+          </div>
+        </div>
+
+        <a
+          routerLink="/dashboard"
+          class="text-xs font-medium text-purple-400 hover:text-teal-500 px-3 py-1.5 rounded-full bg-white/70 transition-colors">
+          Admin
+        </a>
+      </div>
+
+      <!-- Carrusel horizontal (flex overflow-x-auto snap-x) para el portafolio -->
+      <div class="flex gap-3.5 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
+        @for (item of portafolio(); track item.id) {
+          <div class="snap-center shrink-0 w-60 h-36 relative rounded-2xl overflow-hidden shadow-sm group">
+            <img
+              [src]="item.imagenUrl"
+              [alt]="item.titulo"
+              class="w-full h-full object-cover rounded-2xl transition-transform duration-500 group-hover:scale-105" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent flex flex-col justify-end p-3">
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-teal-300">
+                {{ item.categoria }}
+              </span>
+              <p class="text-xs font-medium text-white truncate">
+                {{ item.titulo }}
+              </p>
+            </div>
+          </div>
+        }
+      </div>
+    </header>
+
+    <!-- ==================== 2. SELECCIÓN DE SERVICIO (CATEGORÍAS) ==================== -->
+    <section class="bg-white/60 backdrop-blur-md rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-semibold uppercase tracking-widest text-purple-400">
+            Paso 1
+          </span>
+          <h2 class="text-base font-semibold text-slate-800">
+            Elige tu Servicio
+          </h2>
+        </div>
+        <span class="text-xs text-purple-400 font-medium">
+          {{ categoriaSeleccionada() }}
+        </span>
+      </div>
+
+      <!-- Píldoras seleccionables de Categorías: Uñas, Cejas, Pestañas -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1">
+        @for (cat of categorias(); track cat) {
+          <button
+            type="button"
+            (click)="seleccionarCategoria(cat)"
+            [class.bg-teal-400]="categoriaSeleccionada() === cat"
+            [class.text-white]="categoriaSeleccionada() === cat"
+            [class.shadow-sm]="categoriaSeleccionada() === cat"
+            [class.bg-white/70]="categoriaSeleccionada() !== cat"
+            [class.text-slate-600]="categoriaSeleccionada() !== cat"
+            class="px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 shrink-0">
+            {{ cat }}
+          </button>
+        }
+      </div>
+
+      <!-- Tarjetas compactas de servicios dentro de la categoría activa -->
+      <div class="space-y-2.5 pt-1">
+        @for (srv of serviciosDeCategoria(); track srv.id) {
+          <button
+            type="button"
+            (click)="seleccionarServicio(srv)"
+            [class.ring-2]="servicioSeleccionado().id === srv.id"
+            [class.ring-teal-400]="servicioSeleccionado().id === srv.id"
+            [class.bg-white/90]="servicioSeleccionado().id === srv.id"
+            [class.bg-white/50]="servicioSeleccionado().id !== srv.id"
+            class="w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all">
+            <div>
+              <p class="text-sm font-semibold text-slate-800">{{ srv.nombre }}</p>
+              <span class="text-xs text-purple-400">{{ srv.duracionMinutos }} min</span>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-bold text-slate-800">
+                {{ srv.precio | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </span>
+              @if (servicioSeleccionado().id === srv.id) {
+                <span class="block text-[10px] font-semibold text-teal-600">Seleccionado</span>
+              }
+            </div>
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- ==================== 3. SELECCIÓN DE ESTILISTA ==================== -->
+    <section class="bg-white/60 backdrop-blur-md rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 space-y-4">
+      <div>
+        <span class="text-[11px] font-semibold uppercase tracking-widest text-purple-400">
+          Paso 2
+        </span>
+        <h2 class="text-base font-semibold text-slate-800">
+          Selecciona tu Especialista
+        </h2>
+      </div>
+
+      <!-- Scroll horizontal de avatares (Primer ítem: "Cualquiera disponible" con estrella/varita Ámbar) -->
+      <div class="flex items-stretch gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+        @for (est of estilistas(); track est.id) {
+          <button
+            type="button"
+            (click)="seleccionarEstilista(est.id)"
+            [class.ring-2]="estilistaSeleccionadaId() === est.id"
+            [class.ring-teal-400]="estilistaSeleccionadaId() === est.id"
+            [class.bg-white/90]="estilistaSeleccionadaId() === est.id"
+            [class.bg-white/50]="estilistaSeleccionadaId() !== est.id"
+            class="shrink-0 w-28 p-3 rounded-2xl flex flex-col items-center text-center justify-between transition-all duration-200">
+            
+            @if (est.esGenerica) {
+              <!-- Avatar genérico con ícono Dorado/Ámbar -->
+              <div class="w-14 h-14 rounded-full bg-amber-50 border border-amber-200/70 flex items-center justify-center mb-2 shadow-inner">
+                <lucide-icon
+                  [img]="icons.Sparkles"
+                  [strokeWidth]="iconStrokeWidth"
+                  class="w-6 h-6 text-amber-400">
+                </lucide-icon>
+              </div>
+            } @else {
+              <img
+                [src]="est.avatarUrl"
+                [alt]="est.nombre"
+                class="w-14 h-14 rounded-full object-cover mb-2 ring-2 ring-white shadow-sm" />
+            }
+
+            <div>
+              <p class="text-xs font-semibold text-slate-800 leading-tight">
+                {{ est.nombre }}
+              </p>
+              <span class="block text-[10px] text-purple-400 mt-0.5">
+                {{ est.rol }}
+              </span>
+            </div>
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- ==================== 4. SELECTOR DE FECHA Y HORA (UI LIMPIA) ==================== -->
+    <section class="bg-white/60 backdrop-blur-md rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 space-y-5">
+      <div>
+        <span class="text-[11px] font-semibold uppercase tracking-widest text-purple-400">
+          Paso 3
+        </span>
+        <h2 class="text-base font-semibold text-slate-800">
+          Fecha y Hora Disponible
+        </h2>
+      </div>
+
+      <!-- Fila horizontal con los próximos 7 días (ej. Lun 12, Mar 13) -->
+      <div class="flex items-center gap-2.5 overflow-x-auto pb-1 -mx-1 px-1">
+        @for (dia of proximos7Dias(); track dia.id) {
+          <button
+            type="button"
+            (click)="seleccionarDia(dia)"
+            [class.bg-teal-400]="diaSeleccionado().id === dia.id"
+            [class.text-white]="diaSeleccionado().id === dia.id"
+            [class.shadow-md]="diaSeleccionado().id === dia.id"
+            [class.bg-white/70]="diaSeleccionado().id !== dia.id"
+            [class.text-slate-700]="diaSeleccionado().id !== dia.id"
+            class="shrink-0 w-16 py-3 rounded-2xl flex flex-col items-center justify-center transition-all duration-200">
+            <span
+              [class.text-teal-50]="diaSeleccionado().id === dia.id"
+              [class.text-purple-400]="diaSeleccionado().id !== dia.id"
+              class="text-[11px] font-medium uppercase">
+              {{ dia.diaSemana }}
+            </span>
+            <span class="text-base font-bold mt-0.5">
+              {{ dia.numeroDia }}
+            </span>
+          </button>
+        }
+      </div>
+
+      <!-- Cuadrícula (grid-cols-3 sm:grid-cols-4) con píldoras de horas disponibles -->
+      <div>
+        <p class="text-xs font-medium text-purple-400 mb-2.5">
+          Turnos para el {{ diaSeleccionado().diaSemana }} {{ diaSeleccionado().numeroDia }} de {{ diaSeleccionado().mesCorto }}:
+        </p>
+
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          @for (slot of horasDisponibles(); track slot.etiqueta) {
+            <button
+              type="button"
+              [disabled]="!slot.disponible"
+              (click)="seleccionarHora(slot)"
+              [class.bg-teal-400]="slot.disponible && horaSeleccionada().etiqueta === slot.etiqueta"
+              [class.text-white]="slot.disponible && horaSeleccionada().etiqueta === slot.etiqueta"
+              [class.font-semibold]="slot.disponible && horaSeleccionada().etiqueta === slot.etiqueta"
+              [class.shadow-sm]="slot.disponible && horaSeleccionada().etiqueta === slot.etiqueta"
+              [class.bg-white/75]="slot.disponible && horaSeleccionada().etiqueta !== slot.etiqueta"
+              [class.text-slate-700]="slot.disponible && horaSeleccionada().etiqueta !== slot.etiqueta"
+              [class.opacity-40]="!slot.disponible"
+              [class.cursor-not-allowed]="!slot.disponible"
+              [class.line-through]="!slot.disponible"
+              class="py-2.5 px-2 rounded-2xl text-xs text-center transition-all duration-200">
+              {{ slot.etiqueta }}
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. FORMULARIO SIN FRICCIÓN Y CTA ==================== -->
+    <section class="bg-white/60 backdrop-blur-md rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 space-y-4">
+      <div>
+        <span class="text-[11px] font-semibold uppercase tracking-widest text-purple-400">
+          Paso Final
+        </span>
+        <h2 class="text-base font-semibold text-slate-800">
+          Tus Datos de Contacto
+        </h2>
+        <p class="text-xs text-slate-400 mt-0.5">
+          Sin contraseñas ni registros largos. Te confirmaremos por WhatsApp.
+        </p>
+      </div>
+
+      @if (!reservaConfirmada()) {
+        <div class="space-y-3.5">
+          <!-- Input 1: Tu Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-purple-400 mb-1.5 pl-1">
+              Tu Nombre
+            </label>
+            <div class="relative">
+              <lucide-icon
+                [img]="icons.User"
+                [strokeWidth]="iconStrokeWidth"
+                class="w-4 h-4 text-purple-400 absolute left-4 top-1/2 -translate-y-1/2">
+              </lucide-icon>
+              <input
+                type="text"
+                [ngModel]="nombreClienta()"
+                (ngModelChange)="nombreClienta.set($event)"
+                placeholder="Ej. Valentina Gómez"
+                class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white/40 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all" />
+            </div>
+          </div>
+
+          <!-- Input 2: Número de WhatsApp -->
+          <div>
+            <label class="block text-xs font-medium text-purple-400 mb-1.5 pl-1">
+              Número de WhatsApp
+            </label>
+            <div class="relative">
+              <lucide-icon
+                [img]="icons.Phone"
+                [strokeWidth]="iconStrokeWidth"
+                class="w-4 h-4 text-purple-400 absolute left-4 top-1/2 -translate-y-1/2">
+              </lucide-icon>
+              <input
+                type="tel"
+                [ngModel]="whatsappClienta()"
+                (ngModelChange)="whatsappClienta.set($event)"
+                placeholder="+57 300 000 0000"
+                class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white/40 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all" />
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Mensaje de confirmación estilo Cupertino -->
+        <div class="p-4 rounded-2xl bg-teal-50/90 border border-teal-200/60 text-center space-y-2">
+          <div class="w-10 h-10 rounded-full bg-teal-400 text-white flex items-center justify-center mx-auto">
+            <lucide-icon [img]="icons.Check" [strokeWidth]="iconStrokeWidth" class="w-5 h-5"></lucide-icon>
+          </div>
+          <h3 class="text-sm font-semibold text-slate-800">
+            ¡Reserva Agendada con Éxito!
+          </h3>
+          <p class="text-xs text-slate-600">
+            Te esperamos el <strong>{{ diaSeleccionado().diaSemana }} {{ diaSeleccionado().numeroDia }}</strong> a las <strong>{{ horaSeleccionada().etiqueta }}</strong> para tu sesión de <strong>{{ servicioSeleccionado().nombre }}</strong>.
+          </p>
+          <button
+            type="button"
+            (click)="nuevaReserva()"
+            class="text-xs font-semibold text-teal-600 underline pt-1">
+            Agendar otra cita
+          </button>
+        </div>
+      }
+    </section>
+
+  </div>
+
+  <!-- ==================== BOTÓN FLOTANTE / STICKY CTA INFERIOR ==================== -->
+  <div class="fixed bottom-0 inset-x-0 z-30 p-4 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent">
+    <div class="max-w-lg mx-auto">
+      <button
+        type="button"
+        (click)="confirmarReserva()"
+        [disabled]="reservaConfirmada()"
+        class="w-full py-4 px-6 rounded-full bg-teal-400 hover:bg-teal-500 active:scale-[0.99] disabled:opacity-50
+               text-white font-semibold text-sm shadow-[0_10px_25px_-5px_rgba(45,212,191,0.55)]
+               flex items-center justify-center gap-2.5 transition-all duration-200">
+        <span>Confirmar Reserva</span>
+        <lucide-icon
+          [img]="icons.Check"
+          [strokeWidth]="iconStrokeWidth"
+          class="w-4 h-4">
+        </lucide-icon>
+      </button>
+    </div>
+  </div>
+
+</div>

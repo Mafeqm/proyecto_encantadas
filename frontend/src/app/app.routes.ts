@@ -5,8 +5,15 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { ClientasComponent } from './features/clientas/clientas.component';
 import { ServiciosComponent } from './features/servicios/servicios.component';
 import { EquipoComponent } from './features/equipo/equipo.component';
+import { ClientBookingComponent } from './features/booking/client-booking.component';
 
 export const routes: Routes = [
+  // Vista pública Mobile-First de reserva para clientas
+  {
+    path: 'reservar',
+    component: ClientBookingComponent
+  },
+  // Panel de Administración (Layout con Sidebar y Topbar)
   {
     path: '',
     component: DashboardLayoutComponent,

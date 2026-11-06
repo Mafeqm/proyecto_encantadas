@@ -94,7 +94,189 @@
     </p>
   </article>
 
-  <!-- ==================== 3. TARJETA: ESTADO DE ESTILISTAS (Stylists Today - 2 o 3 cols) ==================== -->
+  <!-- ==================== 3. TARJETA: CITAS DIARIAS (Daily Appointments - 3 cols en LG) ==================== -->
+  <article class="md:col-span-2 lg:col-span-3 bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 flex flex-col justify-between">
+    
+    <div>
+      <!-- Cabecera de Citas Diarias -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+            Daily Appointments
+          </span>
+          <h2 class="text-lg font-semibold text-slate-800 mt-0.5">
+            Citas Diarias — {{ diaSeleccionado() }} de Noviembre
+          </h2>
+        </div>
+
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/80 text-purple-500 shadow-sm self-start sm:self-auto">
+          <lucide-icon [img]="icons.Clock" [strokeWidth]="iconStrokeWidth" class="w-3.5 h-3.5 text-teal-500"></lucide-icon>
+          <span>{{ citasDiarias().length }} turnos programados</span>
+        </span>
+      </div>
+
+      <!-- Encabezados sutiles de columna (ocultos en móvil para diseño limpio) -->
+      <div class="hidden sm:grid sm:grid-cols-12 gap-4 px-3 pb-3 text-[11px] font-semibold uppercase tracking-wider text-purple-400/90 border-b border-purple-100/50">
+        <div class="col-span-2">Hora</div>
+        <div class="col-span-4">Clienta</div>
+        <div class="col-span-3">Servicio</div>
+        <div class="col-span-3 text-right">Estilista Asignada</div>
+      </div>
+
+      <!-- Filas flexibles/grid sin <table> tradicional -->
+      <div class="divide-y divide-purple-100/50">
+        @for (cita of citasDiarias(); track cita.id) {
+          <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 sm:gap-4 py-4 px-3 rounded-2xl hover:bg-white/50 transition-colors border-b border-purple-100/50 last:border-b-0">
+            
+            <!-- Columna 1: Hora -->
+            <div class="sm:col-span-2 flex sm:flex-col items-baseline sm:items-start justify-between">
+              <span class="text-sm font-semibold text-slate-800">
+                {{ cita.hora }}
+              </span>
+              <span class="text-[11px] text-purple-400">
+                {{ cita.duracion }}
+              </span>
+            </div>
+
+            <!-- Columna 2: Nombre de la Clienta -->
+            <div class="sm:col-span-4">
+              <p class="text-sm font-semibold text-slate-800">
+                {{ cita.nombreClienta }}
+              </p>
+              <span class="text-xs text-slate-400">Reserva confirmada</span>
+            </div>
+
+            <!-- Columna 3: Badge suave Lila para el Servicio -->
+            <div class="sm:col-span-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100/75 text-purple-800">
+                {{ cita.servicio }}
+              </span>
+            </div>
+
+            <!-- Columna 4: Avatar y Nombre de la Estilista -->
+            <div class="sm:col-span-3 flex items-center sm:justify-end gap-2.5">
+              <img
+                [src]="cita.avatarEstilista"
+                [alt]="cita.nombreEstilista"
+                class="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm shrink-0" />
+              <span class="text-xs font-medium text-slate-700 truncate">
+                {{ cita.nombreEstilista }}
+              </span>
+            </div>
+
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Pie de la tarjeta -->
+    <div class="mt-4 pt-4 border-t border-purple-100/50 flex items-center justify-between text-xs text-slate-400">
+      <span>Política de tolerancia activa: 15 a 20 minutos</span>
+      <span class="text-teal-600 font-medium">Sincronizado en tiempo real</span>
+    </div>
+  </article>
+
+  <!-- ==================== 4. TARJETA: MINI CALENDARIO INTERACTIVO (1 col en LG) ==================== -->
+  <article class="md:col-span-2 lg:col-span-1 bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 flex flex-col justify-between">
+    
+    <div>
+      <!-- Cabecera con Mes Actual y Flechas Lucide (stroke-width="1.5") -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <span class="text-[11px] font-semibold uppercase tracking-widest text-purple-400 block">
+            Agenda
+          </span>
+          <h2 class="text-base font-semibold text-slate-800">
+            {{ mesActual() }}
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            aria-label="Mes anterior"
+            class="p-2 rounded-xl bg-white/70 hover:bg-white text-purple-500 shadow-sm transition-all">
+            <lucide-icon
+              [img]="icons.ChevronLeft"
+              [strokeWidth]="iconStrokeWidth"
+              class="w-4 h-4">
+            </lucide-icon>
+          </button>
+          <button
+            type="button"
+            aria-label="Mes siguiente"
+            class="p-2 rounded-xl bg-white/70 hover:bg-white text-purple-500 shadow-sm transition-all">
+            <lucide-icon
+              [img]="icons.ChevronRight"
+              [strokeWidth]="iconStrokeWidth"
+              class="w-4 h-4">
+            </lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cabecera de días de la semana (D, L, M, M, J, V, S) -->
+      <div class="grid grid-cols-7 gap-1 text-center mb-2">
+        @for (diaSem of diasSemana; track $index) {
+          <span class="text-[11px] font-semibold text-purple-400 py-1">
+            {{ diaSem }}
+          </span>
+        }
+      </div>
+
+      <!-- Cuadrícula de días interactiva con Signals -->
+      <div class="grid grid-cols-7 gap-y-2 gap-x-1 text-center">
+        @for (dia of diasCalendario(); track $index) {
+          @if (dia.numero !== null) {
+            <button
+              type="button"
+              (click)="seleccionarDia(dia.numero)"
+              [class.bg-teal-400]="diaSeleccionado() === dia.numero"
+              [class.text-white]="diaSeleccionado() === dia.numero"
+              [class.font-semibold]="diaSeleccionado() === dia.numero"
+              [class.shadow-md]="diaSeleccionado() === dia.numero"
+              [class.text-slate-700]="diaSeleccionado() !== dia.numero"
+              [class.hover:bg-white/80]="diaSeleccionado() !== dia.numero"
+              class="relative w-9 h-9 mx-auto rounded-full flex flex-col items-center justify-center text-xs transition-all duration-200">
+              
+              <span>{{ dia.numero }}</span>
+
+              <!-- Punto indicador (dot) debajo del número para días con citas -->
+              @if (dia.tieneCitas) {
+                <span
+                  [class.bg-white]="diaSeleccionado() === dia.numero"
+                  [class.bg-amber-400]="diaSeleccionado() !== dia.numero && dia.tipoIndicador === 'amber'"
+                  [class.bg-teal-400]="diaSeleccionado() !== dia.numero && dia.tipoIndicador === 'teal'"
+                  class="w-1 h-1 rounded-full mt-0.5">
+                </span>
+              }
+            </button>
+          } @else {
+            <span class="w-9 h-9"></span>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Leyenda de indicadores en la base del calendario -->
+    <div class="mt-6 pt-4 border-t border-purple-100/50 space-y-2 text-xs">
+      <div class="flex items-center justify-between text-slate-500">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          Alta demanda
+        </span>
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+          Cupos libres
+        </span>
+      </div>
+      <p class="text-[11px] text-purple-400 text-center pt-1">
+        Día seleccionado: <strong class="text-slate-700">{{ diaSeleccionado() }} Nov</strong>
+      </p>
+    </div>
+  </article>
+
+  <!-- ==================== 5. TARJETA: ESTADO DE ESTILISTAS (Stylists Today - 2 cols) ==================== -->
   <article class="md:col-span-2 lg:col-span-2 bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 flex flex-col justify-between">
     
     <div>
@@ -172,7 +354,7 @@
     </div>
   </article>
 
-  <!-- ==================== 4. TARJETA: SERVICIOS POPULARES (2 cols) ==================== -->
+  <!-- ==================== 6. TARJETA: SERVICIOS POPULARES (2 cols) ==================== -->
   <article class="md:col-span-2 lg:col-span-2 bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 flex flex-col justify-between">
     
     <div>
@@ -248,4 +430,3 @@
   </article>
 
 </section>
-

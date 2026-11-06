@@ -1,0 +1,515 @@
+<!-- ==================== BENTO BOX GRID PRINCIPAL ==================== -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-8">
+
+  <!-- 1. TARJETA KPI: INGRESOS TOTALES DEL DÍA (4 cols) -->
+  <section class="md:col-span-4 bg-white/65 backdrop-blur-lg rounded-4xl shadow-soft border border-white/80 p-6 flex flex-col justify-between">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+        Recaudo del Día
+      </span>
+      <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500">
+        <lucide-icon [img]="icons.Wallet" [strokeWidth]="iconStrokeWidth" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div class="my-4">
+      <p class="text-3xl font-bold text-slate-800 tracking-tight">
+        {{ citaService.totalRecaudadoHoy() | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </p>
+      <p class="text-xs text-purple-400 mt-1">
+        {{ citaService.citasCompletadasCount() }} citas liquidadas hoy
+      </p>
+    </div>
+
+    <div class="pt-4 border-t border-purple-100/60 flex items-center justify-between text-xs">
+      <span class="text-slate-500">Salón (55% / 50%)</span>
+      <span class="font-semibold text-teal-600">
+        {{ citaService.totalGananciaSalon() | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </span>
+    </div>
+  </section>
+
+  <!-- 2. TARJETA KPI: COMISIONES DE ESTILISTAS (4 cols) -->
+  <section class="md:col-span-4 bg-white/65 backdrop-blur-lg rounded-4xl shadow-soft border border-white/80 p-6 flex flex-col justify-between">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+        Bolsa Estilistas
+      </span>
+      <div class="w-10 h-10 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-500">
+        <lucide-icon [img]="icons.TrendingUp" [strokeWidth]="iconStrokeWidth" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div class="my-4">
+      <p class="text-3xl font-bold text-slate-800 tracking-tight">
+        {{ citaService.totalComisionEstilistas() | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </p>
+      <p class="text-xs text-purple-400 mt-1">
+        Liquidación automática 45% (50% en promo)
+      </p>
+    </div>
+
+    <div class="pt-4 border-t border-purple-100/60 flex items-center gap-2 text-xs text-amber-600 font-medium">
+      <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+      <span>Regla activa en CitaService (Spring Boot)</span>
+    </div>
+  </section>
+
+  <!-- 3. TARJETA KPI + CTA: AGENDA ACTIVA & POLÍTICA DE TOLERANCIA (4 cols) -->
+  <section class="md:col-span-4 bg-white/65 backdrop-blur-lg rounded-4xl shadow-soft border border-white/80 p-6 flex flex-col justify-between">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+        Citas en Curso / Pendientes
+      </span>
+      <div class="w-10 h-10 rounded-2xl bg-amber-400/15 flex items-center justify-center text-amber-500">
+        <lucide-icon [img]="icons.Clock" [strokeWidth]="iconStrokeWidth" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <div class="my-4 flex items-baseline justify-between">
+      <div>
+        <p class="text-3xl font-bold text-slate-800 tracking-tight">
+          {{ citaService.citasActivasCount() }}
+        </p>
+        <p class="text-xs text-purple-400 mt-1">
+          Horario comercial: 09:00 – 19:00
+        </p>
+      </div>
+
+      <!-- Call To Action Turquesa -->
+      <button
+        type="button"
+        (click)="abrirModalNuevaCita()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-white text-xs font-semibold shadow-teal-glow transition-all">
+        <lucide-icon [img]="icons.Plus" [strokeWidth]="iconStrokeWidth" class="w-4 h-4"></lucide-icon>
+        <span>Agendar</span>
+      </button>
+    </div>
+
+    <div class="pt-4 border-t border-purple-100/60 flex items-center gap-2 text-xs text-slate-500">
+      <lucide-icon [img]="icons.AlertTriangle" [strokeWidth]="iconStrokeWidth" class="w-4 h-4 text-amber-400 shrink-0"></lucide-icon>
+      <span>Tolerancia máxima de retraso: 15 a 20 min</span>
+    </div>
+  </section>
+
+  <!-- 4. BENTO PRINCIPAL: AGENDA DEL DÍA (8 cols) -->
+  <section class="md:col-span-8 bg-white/65 backdrop-blur-lg rounded-4xl shadow-soft border border-white/80 p-6 sm:p-8 flex flex-col gap-6">
+    
+    <!-- Cabecera y Filtros tipo Píldora -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+          Control de Recepción
+        </span>
+        <h2 class="text-xl font-semibold text-slate-800 mt-0.5">
+          Agenda del Día
+        </h2>
+      </div>
+
+      <!-- Filtros con estado activo en Turquesa -->
+      <div class="flex flex-wrap items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl shadow-soft">
+        @for (item of [
+          { id: 'TODAS', label: 'Todas' },
+          { id: 'Pendiente', label: 'Pendientes' },
+          { id: 'Confirmada', label: 'Confirmadas' },
+          { id: 'Completada', label: 'Completadas' }
+        ]; track item.id) {
+          <button
+            type="button"
+            (click)="filtroEstado.set($any(item.id))"
+            [class.bg-teal-500]="filtroEstado() === item.id"
+            [class.text-white]="filtroEstado() === item.id"
+            [class.shadow-sm]="filtroEstado() === item.id"
+            [class.text-slate-600]="filtroEstado() !== item.id"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all">
+            {{ item.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Lista de Tarjetas de Cita -->
+    <div class="space-y-4">
+      @for (cita of citasFiltradas(); track cita.idCita) {
+        <article class="p-5 rounded-3xl bg-white/75 hover:bg-white/95 shadow-soft transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          
+          <!-- Info Izquierda: Hora + Servicio + Clienta -->
+          <div class="flex items-start gap-4">
+            <!-- Bloque de Hora -->
+            <div class="px-3.5 py-2.5 rounded-2xl bg-purple-50/90 text-center min-w-[78px]">
+              <span class="block text-sm font-bold text-slate-800">
+                {{ cita.fechaHoraInicio | date:'HH:mm' }}
+              </span>
+              <span class="block text-[11px] font-medium text-purple-400">
+                {{ cita.duracionMinutos }} min
+              </span>
+            </div>
+
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-base font-semibold text-slate-800">
+                  {{ cita.nombreClienta }}
+                </h3>
+
+                <!-- Badge de Estado -->
+                @switch (cita.estado) {
+                  @case ('Completada') {
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-teal-500/15 text-teal-700">
+                      Completada
+                    </span>
+                  }
+                  @case ('Confirmada') {
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/15 text-purple-700">
+                      Confirmada
+                    </span>
+                  }
+                  @case ('Pendiente') {
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-400/20 text-amber-700 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                      Pendiente
+                    </span>
+                  }
+                  @case ('Cancelada_por_retraso') {
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/15 text-rose-600">
+                      Cancelada por retraso
+                    </span>
+                  }
+                }
+
+                @if (cita.esPromocion) {
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-400/25 text-amber-800">
+                    Promo 50%
+                  </span>
+                }
+              </div>
+
+              <p class="text-sm text-slate-600 font-medium mt-0.5">
+                {{ cita.nombreServicio }}
+              </p>
+
+              <div class="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-purple-400">
+                <span>Estilista: <strong class="text-slate-700 font-medium">{{ cita.nombreEstilista }}</strong></span>
+                <span>•</span>
+                <span>WhatsApp: {{ cita.numeroWhatsapp }}</span>
+              </div>
+
+              @if (cita.observaciones) {
+                <p class="text-xs text-slate-400 italic mt-1">
+                  "{{ cita.observaciones }}"
+                </p>
+              }
+            </div>
+          </div>
+
+          <!-- Derecha: Precio / Desglose de Comisión / Botones de Acción -->
+          <div class="flex items-center justify-between lg:justify-end gap-4 pt-3 lg:pt-0 border-t lg:border-t-0 border-purple-100/50">
+            
+            @if (cita.estado === 'Completada') {
+              <div class="text-right">
+                <span class="block text-sm font-bold text-slate-800">
+                  {{ cita.valorFinalCobrado | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </span>
+                <span class="block text-[11px] text-teal-600 font-medium">
+                  Estilista: {{ cita.gananciaEstilista | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </span>
+              </div>
+            } @else {
+              <div class="text-right mr-2">
+                <span class="block text-xs text-purple-400">Precio base</span>
+                <span class="block text-sm font-semibold text-slate-700">
+                  {{ cita.precioBaseServicio | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </span>
+              </div>
+            }
+
+            <!-- Acciones para citas activas -->
+            @if (cita.estado === 'Pendiente' || cita.estado === 'Confirmada') {
+              <div class="flex items-center gap-2">
+                <!-- Botón Completar y Liquidar (Turquesa CTA) -->
+                <button
+                  type="button"
+                  (click)="abrirModalLiquidar(cita)"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-teal-500 hover:bg-teal-400 text-white text-xs font-medium shadow-teal-glow transition-all">
+                  <lucide-icon [img]="icons.CheckCircle2" [strokeWidth]="iconStrokeWidth" class="w-4 h-4"></lucide-icon>
+                  <span>Completar</span>
+                </button>
+
+                <!-- Botón Cancelar por Retraso -->
+                <button
+                  type="button"
+                  (click)="cancelarCitaPorRetraso(cita)"
+                  title="Cancelar por retraso (>15-20 min)"
+                  class="p-2 rounded-2xl bg-rose-50/80 hover:bg-rose-100 text-rose-500 transition-colors">
+                  <lucide-icon [img]="icons.XCircle" [strokeWidth]="iconStrokeWidth" class="w-4 h-4"></lucide-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- 5. BENTO LATERAL: EQUIPO DE ESTILISTAS & COMISIONES (4 cols) -->
+  <section class="md:col-span-4 flex flex-col gap-6">
+    
+    <!-- Tarjeta de Liquidación por Estilista -->
+    <div class="bg-white/65 backdrop-blur-lg rounded-4xl shadow-soft border border-white/80 p-6 sm:p-8">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+            Equipo Activo
+          </span>
+          <h2 class="text-xl font-semibold text-slate-800 mt-0.5">
+            Comisiones Hoy
+          </h2>
+        </div>
+        <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500">
+          <lucide-icon [img]="icons.UserCheck" [strokeWidth]="iconStrokeWidth" class="w-5 h-5"></lucide-icon>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        @for (est of resumenEstilistas(); track est.nombre) {
+          <div class="p-4 rounded-3xl bg-white/75 shadow-soft flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-100 to-teal-50 text-purple-600 font-semibold text-xs flex items-center justify-center">
+                {{ est.nombre.slice(0, 2).toUpperCase() }}
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-800">{{ est.nombre }}</p>
+                <p class="text-xs text-purple-400">{{ est.citasHoy }} citas asignadas</p>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <span class="block text-sm font-bold text-teal-600">
+                {{ est.comisionAcumulada | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </span>
+              <span class="block text-[10px] uppercase tracking-wider text-purple-400">
+                Ganancia
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Tarjeta Destacada: Reglas Automáticas del Salón -->
+    <div class="bg-white/65 backdrop-blur-lg rounded-4xl shadow-soft border border-white/80 p-6">
+      <div class="flex items-center gap-2.5 text-amber-500 mb-2">
+        <lucide-icon [img]="icons.Sparkles" [strokeWidth]="iconStrokeWidth" class="w-5 h-5 text-amber-400"></lucide-icon>
+        <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+          Reglas de Negocio Activas
+        </span>
+      </div>
+      <ul class="space-y-2.5 text-xs text-slate-600 mt-3">
+        <li class="flex items-center justify-between">
+          <span>Comisión Estándar Estilista:</span>
+          <strong class="text-slate-800">45%</strong>
+        </li>
+        <li class="flex items-center justify-between">
+          <span>Comisión en Promoción:</span>
+          <strong class="text-amber-600">50%</strong>
+        </li>
+        <li class="flex items-center justify-between">
+          <span>Validación Cruce de Horario:</span>
+          <strong class="text-teal-600">Automática</strong>
+        </li>
+      </ul>
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ==================== MODAL GLASSMORPHISM: COMPLETAR Y LIQUIDAR CITA ==================== -->
+@if (citaSeleccionadaParaLiquidar(); as cita) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
+    <div class="w-full max-w-md bg-white/85 backdrop-blur-xl rounded-4xl shadow-soft-lg border border-white p-6 sm:p-8">
+      
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+            Liquidación de Servicio
+          </span>
+          <h3 class="text-xl font-semibold text-slate-800 mt-0.5">
+            Completar Cita #{{ cita.idCita }}
+          </h3>
+        </div>
+        <button
+          type="button"
+          (click)="cerrarModalLiquidar()"
+          class="p-2 rounded-2xl text-purple-400 hover:bg-purple-50 transition-colors">
+          <lucide-icon [img]="icons.X" [strokeWidth]="iconStrokeWidth" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div class="p-4 rounded-3xl bg-pearl border border-purple-100/60">
+          <p class="text-sm font-semibold text-slate-800">{{ cita.nombreClienta }}</p>
+          <p class="text-xs text-purple-400">{{ cita.nombreServicio }} • {{ cita.nombreEstilista }}</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-2">
+            Valor Final Cobrado (COP)
+          </label>
+          <input
+            type="number"
+            [ngModel]="valorCobradoInput()"
+            (ngModelChange)="valorCobradoInput.set($event)"
+            class="w-full px-4 py-3 rounded-2xl bg-white/90 shadow-soft text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-teal-400" />
+        </div>
+
+        <!-- Switch de Promoción (45% vs 50%) -->
+        <label class="flex items-center justify-between p-4 rounded-3xl bg-amber-50/70 cursor-pointer">
+          <div>
+            <span class="block text-sm font-semibold text-slate-800">¿Aplica Promoción?</span>
+            <span class="block text-xs text-purple-400">Incrementa la comisión de la estilista al 50%</span>
+          </div>
+          <input
+            type="checkbox"
+            [ngModel]="esPromocionInput()"
+            (ngModelChange)="esPromocionInput.set($event)"
+            class="w-5 h-5 accent-teal-500 rounded-lg cursor-pointer" />
+        </label>
+
+        <!-- Vista previa en vivo del reparto -->
+        <div class="p-4 rounded-3xl bg-white/80 shadow-soft space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Ganancia Estilista ({{ esPromocionInput() ? '50%' : '45%' }}):</span>
+            <strong class="text-teal-600">{{ previewGananciaEstilista() | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Ganancia Salón ({{ esPromocionInput() ? '50%' : '55%' }}):</span>
+            <strong class="text-slate-800">{{ previewGananciaSalon() | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <button
+          type="button"
+          (click)="cerrarModalLiquidar()"
+          class="px-4 py-2.5 rounded-2xl text-xs font-semibold text-slate-500 hover:bg-slate-100/70 transition-colors">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="confirmarLiquidacion()"
+          class="px-5 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-white text-xs font-semibold shadow-teal-glow transition-all">
+          Confirmar y Liquidar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ==================== MODAL GLASSMORPHISM: NUEVA CITA ==================== -->
+@if (modalNuevaCitaAbierto()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
+    <div class="w-full max-w-md bg-white/85 backdrop-blur-xl rounded-4xl shadow-soft-lg border border-white p-6 sm:p-8">
+      
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">
+            Reserva sin Fricción
+          </span>
+          <h3 class="text-xl font-semibold text-slate-800 mt-0.5">
+            Agendar Nueva Cita
+          </h3>
+        </div>
+        <button
+          type="button"
+          (click)="cerrarModalNuevaCita()"
+          class="p-2 rounded-2xl text-purple-400 hover:bg-purple-50 transition-colors">
+          <lucide-icon [img]="icons.X" [strokeWidth]="iconStrokeWidth" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1.5">
+            Nombre de la Clienta
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="nuevaCitaForm.nombreClienta"
+            placeholder="Ej. Laura Castellanos"
+            class="w-full px-4 py-2.5 rounded-2xl bg-white/90 shadow-soft text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-400" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1.5">
+              Estilista
+            </label>
+            <select
+              [(ngModel)]="nuevaCitaForm.idEstilista"
+              class="w-full px-3 py-2.5 rounded-2xl bg-white/90 shadow-soft text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-400">
+              @for (est of catalogoEstilistas; track est.id) {
+                <option [value]="est.id">{{ est.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1.5">
+              Hora Inicio (09:00-18:30)
+            </label>
+            <input
+              type="time"
+              min="09:00"
+              max="18:30"
+              [(ngModel)]="nuevaCitaForm.horaInicio"
+              class="w-full px-3 py-2.5 rounded-2xl bg-white/90 shadow-soft text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-400" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1.5">
+            Servicio
+          </label>
+          <select
+            [(ngModel)]="nuevaCitaForm.idServicio"
+            class="w-full px-3 py-2.5 rounded-2xl bg-white/90 shadow-soft text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-400">
+            @for (srv of catalogoServicios; track srv.id) {
+              <option [value]="srv.id">{{ srv.nombre }} ({{ srv.duracion }} min)</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1.5">
+            Observaciones
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="nuevaCitaForm.observaciones"
+            placeholder="Preferencias o notas de aplicación..."
+            class="w-full px-4 py-2.5 rounded-2xl bg-white/90 shadow-soft text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-400" />
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <button
+          type="button"
+          (click)="cerrarModalNuevaCita()"
+          class="px-4 py-2.5 rounded-2xl text-xs font-semibold text-slate-500 hover:bg-slate-100/70 transition-colors">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="guardarNuevaCita()"
+          class="px-5 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-white text-xs font-semibold shadow-teal-glow transition-all">
+          Guardar Reserva
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
